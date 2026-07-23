@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Meet our specialist at Hollywood Clinic Cairo.">
+  <meta name="theme-color" content="#0B1D3A">
+  <title>Doctor — Hollywood Clinic</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    .doctor-profile-hero{display:grid;gap:2.5rem;align-items:center;grid-template-columns:1fr;max-width:1100px;margin:0 auto}
+    @media(min-width:900px){.doctor-profile-hero{grid-template-columns:1fr 1.3fr;gap:4rem}}
+    .doctor-profile-photo{aspect-ratio:3/4;border-radius:1.5rem;overflow:hidden;box-shadow:0 30px 60px -20px rgba(11,29,58,.25);background:#e8edf4}
+    .doctor-profile-photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .doctor-profile-info h1{font-size:clamp(2rem,4.5vw,2.75rem);margin:.5rem 0 .75rem}
+    .doctor-credentials{list-style:none;padding:0;margin:1.5rem 0}
+    .doctor-credentials li{padding:.6rem 0;border-bottom:1px solid var(--line);font-size:.9375rem;color:var(--body);display:flex;gap:.75rem;align-items:center}
+    .doctor-credentials li::before{content:'★';color:var(--gold)}
+  </style>
+</head>
+<body>
+ <!--NAV-->
+
+ <section class="section" style="padding-top:7rem;background:linear-gradient(180deg,#DEE7F1 0%,#F0F5FB 100%)">
+ <div class="container">
+ <div class="breadcrumb" style="justify-content:flex-start;margin-bottom:2rem;color:var(--muted)">
+ <a href="../index.html" data-i18n="nav.home">Home</a>
+ <span style="margin:0.5rem">/</span>
+ <a href="../index.html#doctors" data-i18n="nav.doctors">Doctors</a>
+ <span style="margin:0.5rem">/</span>
+ <span id="dCrumb"></span>
+ </div>
+ <div class="doctor-profile-hero">
+ <div class="doctor-profile-photo fade-up"><img id="dPhoto" src="" alt="" loading="eager"></div>
+ <div class="doctor-profile-info fade-up d1">
+ <p class="eyebrow" id="dEyebrow"></p>
+ <h1 id="dName"></h1>
+ <p id="dTagline" style="font-size:1.0625rem;color:var(--body);line-height:1.7"></p>
+ <ul class="doctor-credentials" id="dCreds"></ul>
+ <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem">
+ <a href="../booking.html" class="btn btn-primary" id="dBook">Book a Consultation</a>
+ <a href="https://wa.me/201000007176" class="btn btn-outline" id="dWhatsapp">WhatsApp</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <section class="section bg-cream" id="dAboutSec" style="display:none">
+ <div class="container" style="max-width:820px">
+ <div class="text-center mb-14">
+ <div class="lux-line"></div>
+ <p class="eyebrow" id="dAboutEyebrow">About</p>
+ <h2 class="section-title" id="dAboutTitle"></h2>
+ </div>
+ <div id="dBio"></div>
+ </div>
+ </section>
+
+ <!--FOOTER-->
+
+ <script src="../assets/js/i18n.js"></script>
+ <script src="../assets/js/main.js"></script>
+ <script src="../assets/js/supabase-config.js"></script>
+ <script>
+  (function(){
+    'use strict';
+    function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+    function lang(){ return (window.I18N&&window.I18N.current&&window.I18N.current())||'en'; }
+    function resolveImg(u){ if(u && !/^https?:|^\//.test(u)) u='../'+u; return u; }
+    var slug=new URLSearchParams(location.search).get('slug');
+    var D=null;
+
+    function pick(en,ar){ return (lang()==='ar'&&ar)?ar:(en||''); }
+    function render(){
+      if(!D){ document.getElementById('dName').textContent='Doctor not found';
+        document.getElementById('dCrumb').textContent='—'; return; }
+      var name=pick(D.name_en,D.name_ar);
+      var ar=lang()==='ar';
+      document.getElementById('dBook').textContent = ar?'احجزي استشارة':'Book a Consultation';
+      document.getElementById('dWhatsapp').textContent = ar?'واتساب':'WhatsApp';
+      document.getElementById('dAboutEyebrow').textContent = ar?'نبذة':'About';
+      document.getElementById('dPhoto').src=resolveImg(D.image_url||('assets/images/doctors/'+D.slug+'.png'));
+      document.getElementById('dPhoto').alt=name;
+      document.getElementById('dEyebrow').textContent=pick(D.specialty_en,D.specialty_ar);
+      document.getElementById('dName').textContent=name;
+      document.getElementById('dCrumb').textContent=name;
+      document.title=name+' — Hollywood Clinic';
+      var tag=pick(D.tagline_en,D.tagline_ar);
+      var tagEl=document.getElementById('dTagline'); tagEl.textContent=tag; tagEl.style.display=tag?'':'none';
+      var creds=pick(D.credentials_en,D.credentials_ar).split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean);
+      document.getElementById('dCreds').innerHTML=creds.map(function(c){return '<li>'+esc(c)+'</li>';}).join('');
+      var bio=pick(D.bio_en,D.bio_ar);
+      if(bio){ document.getElementById('dAboutSec').style.display='';
+        document.getElementById('dAboutTitle').textContent=name;
+        document.getElementById('dBio').innerHTML=bio.split(/\n\s*\n|\r?\n/).map(function(p){return p.trim();}).filter(Boolean)
+          .map(function(p){return '<p style="font-size:1.0625rem;line-height:1.85;color:var(--body);margin-bottom:1.1rem">'+esc(p)+'</p>';}).join('');
+      } else { document.getElementById('dAboutSec').style.display='none'; }
+    }
+    function load(){
+      if(!slug){ render(); return; }
+      if(!(window.HC&&window.HC.db)) return;
+      window.HC.db.from('doctors').select('*').eq('slug',slug).limit(1).then(function(r){
+        if(r.error||!r.data||!r.data.length){ D=null; render(); return; }
+        D=r.data[0]; render();
+      });
+    }
+    if(window.HC&&window.HC.db) load();
+    document.addEventListener('hc:db-ready', load);
+    document.addEventListener('i18n:applied', function(){ if(D) render(); });
+  })();
+  </script>
+</body>
+</html>
