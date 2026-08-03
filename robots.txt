@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Allow: /
+
+Sitemap: https://www.hollywoodclinics.net/sitemap.xml
+Sitemap: https://www.hollywoodclinics.net/blog-sitemap.xml
